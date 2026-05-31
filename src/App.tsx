@@ -205,7 +205,7 @@ export default function App() {
             Press Any Key!
           </h1>
           <p className="text-2xl md:text-3xl text-white/90 font-semibold">
-            Press A-Z to see animals and objects
+            Press A-Z to see words
           </p>
         </div>
       )}
@@ -216,7 +216,7 @@ export default function App() {
             Try Again!
           </div>
           <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-8 max-w-lg mx-auto">
-            <p className="text-2xl text-white font-bold">Press A-Z keys for animals!</p>
+            <p className="text-2xl text-white font-bold">Press A-Z keys to learn words!</p>
           </div>
         </div>
       )}
