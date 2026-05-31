@@ -80,7 +80,7 @@ export default function App() {
     }, 250);
   }, []);
 
-  const playSound = useCallback((type: 'success' | 'tryAgain') => {
+  const playSound = useCallback((type: 'success' | 'invalid') => {
     const audioContext = new (window.AudioContext || (window as Window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
@@ -92,24 +92,25 @@ export default function App() {
       oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
       oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
       oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.5);
     } else {
-      oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
     }
-
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.5);
   }, []);
 
   const handleKeyPress = useCallback((event: KeyboardEvent) => {
     const key = event.key.toUpperCase();
 
     if (!/^[A-Z]$/.test(key)) {
-      setCounter((prev) => prev + 1);
       setShowTryAgain(true);
-      playSound('tryAgain');
+      playSound('invalid');
       setTimeout(() => setShowTryAgain(false), 1500);
       return;
     }
