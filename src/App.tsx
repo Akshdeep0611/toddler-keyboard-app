@@ -1,7 +1,88 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Maximize, Minimize, RotateCcw } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { alphabetData, AlphabetItem } from './data/alphabetData';
+import { alphabetData, numberData, AlphabetItem, NumberItem } from './data/alphabetData';
+
+const WORD_TO_EMOJI: Record<string, string> = {
+  'Apple': '🍎',
+  'Ant': '🐜',
+  'Airplane': '✈️',
+  'Ball': '⚽',
+  'Butterfly': '🦋',
+  'Bird': '🐦',
+  'Cat': '🐱',
+  'Car': '🚗',
+  'Cow': '🐮',
+  'Dog': '🐕',
+  'Duck': '🦆',
+  'Drum': '🥁',
+  'Egg': '🥚',
+  'Elephant': '🐘',
+  'Eye': '👁️',
+  'Fish': '🐟',
+  'Flower': '🌸',
+  'Frog': '🐸',
+  'Giraffe': '🦒',
+  'Goat': '🐐',
+  'Grapes': '🍇',
+  'House': '🏠',
+  'Hat': '🎩',
+  'Heart': '❤️',
+  'Ice': '🧊',
+  'Island': '🏝️',
+  'Iron': '🔌',
+  'Jellyfish': '🪼',
+  'Jug': '🫗',
+  'Jet': '✈️',
+  'Kite': '🪁',
+  'Key': '🔑',
+  'King': '👑',
+  'Lion': '🦁',
+  'Leaf': '🍃',
+  'Lemon': '🍋',
+  'Monkey': '🐵',
+  'Moon': '🌙',
+  'Milk': '🥛',
+  'Nest': '🪺',
+  'Nose': '👃',
+  'Necklace': '📿',
+  'Orange': '🍊',
+  'Owl': '🦉',
+  'Ocean': '🌊',
+  'Pig': '🐷',
+  'Penguin': '🐧',
+  'Piano': '🎹',
+  'Queen': '👸',
+  'Question': '❓',
+  'Quilt': '🛏️',
+  'Rabbit': '🐰',
+  'Rainbow': '🌈',
+  'Robot': '🤖',
+  'Sun': '☀️',
+  'Strawberry': '🍓',
+  'Snake': '🐍',
+  'Tiger': '🐯',
+  'Tree': '🌳',
+  'Toy': '🧸',
+  'Umbrella': '☂️',
+  'Up': '⬆️',
+  'Unicorn': '🦄',
+  'Van': '🚐',
+  'Violin': '🎻',
+  'Vegetable': '🥬',
+  'Watermelon': '🍉',
+  'Whale': '🐋',
+  'Wolf': '🐺',
+  'Xylophone': '🎵',
+  'X-ray': '🩻',
+  'Xmas': '🎄',
+  'Yo-yo': '🪀',
+  'Yellow': '💛',
+  'Yarn': '🧶',
+  'Zebra': '🦓',
+  'Zoo': '🦁',
+  'Zigzag': '⚡',
+};
 
 const BACKGROUND_COLORS = [
   'from-pink-400 via-red-400 to-yellow-400',
@@ -16,6 +97,7 @@ const MILESTONES = [50, 100, 150, 200, 250, 300, 350, 400, 450, 500];
 
 export default function App() {
   const [currentItem, setCurrentItem] = useState<AlphabetItem | null>(null);
+  const [currentNumber, setCurrentNumber] = useState<NumberItem | null>(null);
   const [counter, setCounter] = useState(0);
   const [milestone, setMilestone] = useState<number | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -23,6 +105,7 @@ export default function App() {
   const [showTryAgain, setShowTryAgain] = useState(false);
   const lastLetterRef = useRef<string>('');
   const lastItemIndexRef = useRef<Record<string, number>>({});
+  const lastItemEmojiRef = useRef<{ emoji: string; word: string } | null>(null);
 
   const triggerCelebration = useCallback(() => {
     const count = 200;
@@ -108,6 +191,37 @@ export default function App() {
   const handleKeyPress = useCallback((event: KeyboardEvent) => {
     const key = event.key.toUpperCase();
 
+    // Handle number keys (0-9)
+    if (/^[0-9]$/.test(key)) {
+      const numberItem = numberData[key];
+      if (!numberItem) return;
+
+      setCurrentNumber(numberItem);
+      setCurrentItem(null);
+      setShowTryAgain(false);
+
+      const newBackground = BACKGROUND_COLORS[Math.floor(Math.random() * BACKGROUND_COLORS.length)];
+      setBackgroundColor(newBackground);
+
+      setCounter((prev) => {
+        const newCount = prev + 1;
+
+        if (MILESTONES.includes(newCount)) {
+          setMilestone(newCount);
+          triggerMilestoneCelebration();
+          setTimeout(() => setMilestone(null), 4000);
+        } else {
+          triggerCelebration();
+        }
+
+        return newCount;
+      });
+
+      playSound('success');
+      return;
+    }
+
+    // Handle letter keys (A-Z)
     if (!/^[A-Z]$/.test(key)) {
       setShowTryAgain(true);
       playSound('invalid');
@@ -131,7 +245,13 @@ export default function App() {
     }
 
     lastLetterRef.current = key;
+
+    // Store emoji for number display
+    const emoji = WORD_TO_EMOJI[newItem.word] || '⭐';
+    lastItemEmojiRef.current = { emoji, word: newItem.word };
+
     setCurrentItem(newItem);
+    setCurrentNumber(null);
     setShowTryAgain(false);
 
     const newBackground = BACKGROUND_COLORS[Math.floor(Math.random() * BACKGROUND_COLORS.length)];
@@ -161,9 +281,11 @@ export default function App() {
 
   const handleClear = () => {
     setCurrentItem(null);
+    setCurrentNumber(null);
     setCounter(0);
     lastLetterRef.current = '';
     lastItemIndexRef.current = {};
+    lastItemEmojiRef.current = null;
   };
 
   const toggleFullscreen = () => {
@@ -199,13 +321,13 @@ export default function App() {
         <p className="text-2xl font-bold text-gray-800">Presses: <span className="text-blue-600">{counter}</span></p>
       </div>
 
-      {!currentItem && !showTryAgain && (
+      {!currentItem && !currentNumber && !showTryAgain && (
         <div className="text-center space-y-6 animate-pulse">
           <h1 className="text-6xl md:text-8xl font-extrabold text-white drop-shadow-2xl">
             Press Any Key!
           </h1>
           <p className="text-2xl md:text-3xl text-white/90 font-semibold">
-            Press A-Z to see words
+            Press A-Z to see words, 0-9 to count
           </p>
         </div>
       )}
@@ -216,7 +338,7 @@ export default function App() {
             Try Again!
           </div>
           <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-8 max-w-lg mx-auto">
-            <p className="text-2xl text-white font-bold">Press A-Z keys to learn words!</p>
+            <p className="text-2xl text-white font-bold">Press A-Z or 0-9 keys!</p>
           </div>
         </div>
       )}
@@ -238,6 +360,40 @@ export default function App() {
               <div className="absolute -bottom-4 -right-4 bg-yellow-400 text-gray-900 rounded-full w-20 h-20 flex items-center justify-center text-4xl font-bold shadow-xl animate-pulse">
                 {currentItem.letter}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {currentNumber && !showTryAgain && (
+        <div className="text-center space-y-6 animate-in fade-in zoom-in duration-500">
+          <div className="bg-white/30 backdrop-blur-md rounded-3xl p-8 shadow-2xl max-w-4xl mx-auto transform hover:scale-105 transition-all duration-300">
+            <div className="text-9xl font-extrabold text-white drop-shadow-2xl mb-6 animate-bounce">
+              {currentNumber.number}
+            </div>
+            <p className="text-3xl md:text-5xl font-bold text-white mb-8 tracking-wide">
+              {currentNumber.number} is for <span className="text-yellow-300">{currentNumber.word}</span>
+            </p>
+            <div className="bg-white/20 rounded-3xl p-8 shadow-2xl">
+              <div className="text-6xl md:text-8xl font-bold text-white mb-4 flex flex-wrap justify-center gap-4">
+                {lastItemEmojiRef.current ? (
+                  Array.from({ length: parseInt(currentNumber.number) || 0 }, (_, i) => (
+                    <span key={i} className="animate-bounce" style={{ animationDelay: `${i * 0.1}s` }}>
+                      {lastItemEmojiRef.current?.emoji}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-4xl text-white/80">Press a letter first!</span>
+                )}
+              </div>
+              {lastItemEmojiRef.current && parseInt(currentNumber.number) > 0 && (
+                <div className="text-2xl md:text-3xl text-white font-bold mt-4">
+                  Count: {Array.from({ length: parseInt(currentNumber.number) }, (_, i) => i + 1).join(', ')}
+                </div>
+              )}
+            </div>
+            <div className="absolute -bottom-4 -right-4 bg-yellow-400 text-gray-900 rounded-full w-20 h-20 flex items-center justify-center text-4xl font-bold shadow-xl animate-pulse">
+              {currentNumber.number}
             </div>
           </div>
         </div>

@@ -4,6 +4,24 @@ export interface AlphabetItem {
   svg: string;
 }
 
+export interface NumberItem {
+  number: string;
+  word: string;
+}
+
+export const numberData: Record<string, NumberItem> = {
+  '0': { number: '0', word: 'Zero' },
+  '1': { number: '1', word: 'One' },
+  '2': { number: '2', word: 'Two' },
+  '3': { number: '3', word: 'Three' },
+  '4': { number: '4', word: 'Four' },
+  '5': { number: '5', word: 'Five' },
+  '6': { number: '6', word: 'Six' },
+  '7': { number: '7', word: 'Seven' },
+  '8': { number: '8', word: 'Eight' },
+  '9': { number: '9', word: 'Nine' },
+};
+
 export const alphabetData: Record<string, AlphabetItem[]> = {
   A: [
     { letter: 'A', word: 'Apple', svg: '<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle cx="100" cy="90" r="70" fill="#FF6B6B" class="animate-bounce"/><rect x="95" y="40" width="10" height="60" fill="#8B4513"/><ellipse cx="75" cy="50" rx="20" ry="30" fill="#228B22"/></svg>' },
