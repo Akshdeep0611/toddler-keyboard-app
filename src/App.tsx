@@ -353,10 +353,11 @@ export default function App() {
               {currentItem.letter} is for <span className="text-yellow-300">{currentItem.word}</span>
             </p>
             <div className="relative inline-block w-80 h-80 md:w-96 md:h-96 flex items-center justify-center">
-              <div
-                className="w-full h-full rounded-3xl shadow-2xl border-8 border-white/50 transform transition-all duration-500 hover:scale-105 flex items-center justify-center bg-white/10"
-                dangerouslySetInnerHTML={{ __html: currentItem.svg }}
-              />
+              <div className="w-full h-full rounded-3xl shadow-2xl border-8 border-white/50 transform transition-all duration-500 hover:scale-105 flex items-center justify-center bg-white/10">
+                <span className="text-[10rem] md:text-[14rem] leading-none animate-bounce">
+                  {WORD_TO_EMOJI[currentItem.word] || '⭐'}
+                </span>
+              </div>
               <div className="absolute -bottom-4 -right-4 bg-yellow-400 text-gray-900 rounded-full w-20 h-20 flex items-center justify-center text-4xl font-bold shadow-xl animate-pulse">
                 {currentItem.letter}
               </div>
@@ -367,7 +368,7 @@ export default function App() {
 
       {currentNumber && !showTryAgain && (
         <div className="text-center space-y-6 animate-in fade-in zoom-in duration-500">
-          <div className="bg-white/30 backdrop-blur-md rounded-3xl p-8 shadow-2xl max-w-4xl mx-auto transform hover:scale-105 transition-all duration-300">
+          <div className="bg-white/30 backdrop-blur-md rounded-3xl p-8 shadow-2xl max-w-4xl mx-auto transform hover:scale-105 transition-all duration-300 relative">
             <div className="text-9xl font-extrabold text-white drop-shadow-2xl mb-6 animate-bounce">
               {currentNumber.number}
             </div>
@@ -375,6 +376,11 @@ export default function App() {
               {currentNumber.number} is for <span className="text-yellow-300">{currentNumber.word}</span>
             </p>
             <div className="bg-white/20 rounded-3xl p-8 shadow-2xl">
+              {lastItemEmojiRef.current && parseInt(currentNumber.number) > 0 && (
+                <p className="text-2xl md:text-3xl text-white font-bold mb-6">
+                  {currentNumber.number} {lastItemEmojiRef.current.word}{parseInt(currentNumber.number) > 1 ? 's' : ''}
+                </p>
+              )}
               <div className="text-6xl md:text-8xl font-bold text-white mb-4 flex flex-wrap justify-center gap-4">
                 {lastItemEmojiRef.current ? (
                   Array.from({ length: parseInt(currentNumber.number) || 0 }, (_, i) => (
